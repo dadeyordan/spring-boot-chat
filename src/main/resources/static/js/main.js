@@ -98,9 +98,13 @@ function onMessageReceived(payload) {
     messageElement.classList.add('chat-message');
 
     var avatarElement = document.createElement('i');
-    var avatarText = document.createTextNode(message.sender[0]);
-    avatarElement.appendChild(avatarText);
-    avatarElement.style['background-color'] = getAvatarColor(message.sender);
+    if (message.avatar) {
+      setAvatarImage(avatarElement);
+    } else {
+      var avatarText = document.createTextNode(message.sender[0]);
+      avatarElement.appendChild(avatarText);
+      setAvatarColor(avatarElement, message.sender);
+    }
 
     messageElement.appendChild(avatarElement);
 
@@ -127,15 +131,21 @@ function onMessageReceived(payload) {
   messageArea.scrollTop = messageArea.scrollHeight;
 }
 
-function getAvatarColor(messageSender) {
+function setAvatarImage(avatarElement) {
+  avatarElement.style['background-image'] = "url(../image/admin.png)";
+  avatarElement.style['background-size'] = "contain";
+}
+
+function setAvatarColor(avatarElement, messageSender) {
   var hash = 0;
   for (var i = 0; i < messageSender.length; i++) {
     hash = 31 * hash + messageSender.charCodeAt(i);
   }
 
   var index = Math.abs(hash % colors.length);
-  return colors[index];
+
+  avatarElement.style['background-color'] = colors[index];
 }
 
-usernameForm.addEventListener('submit', connect, true)
-messageForm.addEventListener('submit', send, true)
+usernameForm.addEventListener('submit', connect, true);
+messageForm.addEventListener('submit', send, true);

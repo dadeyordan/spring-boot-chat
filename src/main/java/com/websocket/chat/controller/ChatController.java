@@ -34,6 +34,7 @@ public class ChatController {
       @DestinationVariable String roomId,
       @Payload ChatMessage chatMessage) {
     ChatMessage adminChatMessage = ChatMessage.builder()
+        .avatar("../image/admin.png")
         .sender("Admin")
         .content(format("Welcome %s from the other world....", chatMessage.getSender()))
         .type(MessageType.CHAT)
@@ -46,6 +47,7 @@ public class ChatController {
   public void sendMessage(
       @DestinationVariable String roomId,
       @Payload ChatMessage chatMessage) {
+    chatMessage.setDateTime(LocalDateTime.now());
     messagingTemplate.convertAndSend(format("/topic/%s", roomId), chatMessage);
   }
 }

@@ -33,7 +33,7 @@ body:before {
   position: absolute;
   top: 0;
   left: 0;
-  background-image: url("maxresdefault.jpg");
+  background-image: url("../image/maxresdefault.jpg");
   content: "";
   z-index: 0;
 }
