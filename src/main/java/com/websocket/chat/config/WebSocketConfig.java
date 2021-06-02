@@ -1,4 +1,4 @@
-package com.tupinamba.springbootwebsocket.config;
+package com.websocket.chat.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

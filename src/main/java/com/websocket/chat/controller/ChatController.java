@@ -1,8 +1,8 @@
-package com.tupinamba.springbootwebsocket.controller;
+package com.websocket.chat.controller;
 
 import static java.lang.String.format;
 
-import com.tupinamba.springbootwebsocket.model.ChatMessage;
+import com.websocket.chat.model.ChatMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;

@@ -1,7 +1,10 @@
-package com.tupinamba.springbootwebsocket.config;
-import com.tupinamba.springbootwebsocket.model.ChatMessage;
-import com.tupinamba.springbootwebsocket.model.ChatMessage.MessageType;
+package com.websocket.chat.config;
+
+import com.websocket.chat.model.ChatMessage;
+import com.websocket.chat.model.MessageType;
 import java.util.Objects;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -11,6 +14,7 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 
+@Slf4j
 @Component
 public class WebSocketChatEventListener {
 
@@ -19,21 +23,29 @@ public class WebSocketChatEventListener {
 
   @EventListener
   public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-    System.out.println("Received a new web socket connection");
+    log.info("Received a new web socket connection");
   }
 
   @EventListener
   public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
     StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
-    String username = (String) headerAccessor.getSessionAttributes().get("username");
-    if(Objects.nonNull(username)) {
-
-      ChatMessage chatMessage = new ChatMessage();
-      chatMessage.setType(MessageType.LEAVE);
-      chatMessage.setSender(username);
-
+    String username = this.getActiveUsername(headerAccessor);
+    if (Objects.nonNull(username)) {
+      ChatMessage chatMessage = ChatMessage.builder()
+          .type(MessageType.LEAVE)
+          .sender(username)
+          .build();
       messagingTemplate.convertAndSend("/topic/public", chatMessage);
     }
+  }
+
+  private String getActiveUsername(StompHeaderAccessor headerAccessor) {
+    return Optional.ofNullable(headerAccessor)
+        .filter(
+            stompHeaderAccessor -> Objects.nonNull(stompHeaderAccessor.getSessionAttributes()) &&
+                stompHeaderAccessor.getSessionAttributes().containsKey("username"))
+        .map(stompHeaderAccessor -> (String) stompHeaderAccessor.getSessionAttributes()
+            .get("username"))
+        .orElse(null);
   }
 }
