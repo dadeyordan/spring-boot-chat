@@ -181,6 +181,10 @@ button.accent {
   margin: 0;
 }
 
+.chat-date-time {
+  font-size: 10px;
+}
+
 #chat-page .event-message {
   width: 100%;
   text-align: center;

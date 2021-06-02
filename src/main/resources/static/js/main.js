@@ -21,7 +21,7 @@ function connect(event) {
   username = document.querySelector('#name').value.trim();
   roomId = document.querySelector('#roomId').value.trim();
 
-  if (username) {
+  if (username && roomId) {
     usernamePage.classList.add('hidden');
     chatPage.classList.remove('hidden');
 
@@ -29,6 +29,7 @@ function connect(event) {
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, onConnected, onError);
+
   }
   event.preventDefault();
 }
@@ -49,6 +50,18 @@ function onConnected() {
 function onError(error) {
   connectingElement.textContent = 'Could not connect to WebSocket! Please refresh the page and try again or contact the administrator.';
   connectingElement.style.color = 'red';
+}
+
+function welcome() {
+  var chatMessage = {
+    sender: username,
+    content: messageInput.value,
+    type: 'CHAT'
+  };
+
+  stompClient.send("/app/chat/" + roomId + "/welcome", {},
+      JSON.stringify(chatMessage));
+  messageInput.value = '';
 }
 
 function send(event) {
@@ -76,6 +89,8 @@ function onMessageReceived(payload) {
   if (message.type === 'JOIN') {
     messageElement.classList.add('event-message');
     message.content = message.sender + ' joined!';
+
+    welcome();
   } else if (message.type === 'LEAVE') {
     messageElement.classList.add('event-message');
     message.content = message.sender + ' left!';
@@ -94,6 +109,13 @@ function onMessageReceived(payload) {
     usernameElement.appendChild(usernameText);
     messageElement.appendChild(usernameElement);
   }
+
+  var dateElement = document.createElement('p');
+  dateElement.classList.add("chat-date-time");
+  var messageDate = document.createTextNode(message.dateTime);
+  dateElement.appendChild(messageDate);
+
+  messageElement.appendChild(dateElement);
 
   var textElement = document.createElement('p');
   var messageText = document.createTextNode(message.content);
