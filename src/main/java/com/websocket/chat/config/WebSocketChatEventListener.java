@@ -29,23 +29,16 @@ public class WebSocketChatEventListener {
   @EventListener
   public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
     StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-    String username = this.getActiveUsername(headerAccessor);
-    if (Objects.nonNull(username)) {
-      ChatMessage chatMessage = ChatMessage.builder()
-          .type(MessageType.LEAVE)
-          .sender(username)
-          .build();
-      messagingTemplate.convertAndSend("/topic/public", chatMessage);
-    }
-  }
-
-  private String getActiveUsername(StompHeaderAccessor headerAccessor) {
-    return Optional.ofNullable(headerAccessor)
-        .filter(
-            stompHeaderAccessor -> Objects.nonNull(stompHeaderAccessor.getSessionAttributes()) &&
-                stompHeaderAccessor.getSessionAttributes().containsKey("username"))
-        .map(stompHeaderAccessor -> (String) stompHeaderAccessor.getSessionAttributes()
-            .get("username"))
-        .orElse(null);
+    Optional.ofNullable(headerAccessor)
+        .filter(accessor -> Objects.nonNull(accessor.getSessionAttributes()) &&
+            accessor.getSessionAttributes().containsKey("username"))
+        .ifPresent(accessor -> {
+          String username = (String) accessor.getSessionAttributes().get("username");
+          ChatMessage chatMessage = ChatMessage.builder()
+              .type(MessageType.LEAVE)
+              .sender(username)
+              .build();
+          messagingTemplate.convertAndSend("/topic/public", chatMessage);
+        });
   }
 }
